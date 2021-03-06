@@ -85,7 +85,7 @@ void Model::setYearsAgo(int value)
 void Model::search()
 {
     // TODO [ab]: start as a separate thread
-    // TODO [ab]: add more regular expressions
+    // TODO [ab]: retrieve date from filepath, not only name
 
     if (m_date.isNull()) {
         return;
@@ -95,34 +95,22 @@ void Model::search()
     }
 
     QDirIterator it(m_imageFolder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
-    QRegularExpression re(R"(^(\d\d\d\d)(\d\d)(\d\d)_)");
+
     QDate yearAgo = m_date.addYears(-m_yearsAgo);
     m_sameDateMatches.clear();
 
     while (it.hasNext())
     {
         it.next();
-        qDebug() << it.filePath();
 
-        QRegularExpressionMatch match = re.match(it.fileName());
-
-        if (!match.hasMatch()) {
-            qDebug() << "no match";
-            continue;
-        }
-
-        QString year = match.captured(1);
-        QString month = match.captured(2);
-        QString day = match.captured(3);
-
-        QDate imageDate = QDate(year.toInt(), month.toInt(), day.toInt());
+        QDate imageDate = dateFromFileName(it.fileInfo().absolutePath(), it.fileName());
         if (imageDate.isNull()) {
-            qDebug() << "invalid date, skipped" << year << month << day;
+            qDebug() << it.fileInfo().absolutePath() << it.fileName() << "invalid date, skipped";
             continue;
         }
 
         qint64 days = yearAgo.daysTo(imageDate);
-        qDebug() << imageDate << days;
+        //qDebug() << imageDate << days;
 
         if (days==0) {
             m_sameDateMatches.append(it.filePath());
@@ -145,6 +133,97 @@ void Model::search()
 
     qDebug() << "same date found" << m_sameDateMatches.size();
     emit matchCountChanged(m_sameDateMatches.size());
+}
+
+QDate Model::dateFromFileName(const QString& dir, const QString& name)
+{
+    QRegularExpression re1(R"((\d\d\d\d)(\d\d)(\d\d))");
+    QRegularExpressionMatch match = re1.match(name);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(1).toInt(),
+                match.captured(2).toInt(),
+                match.captured(3).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    QRegularExpression re2(R"(^(\d\d)(\d\d)(\d\d)_)");
+    match = re2.match(name);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(1).toInt(),
+                match.captured(2).toInt(),
+                match.captured(3).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    QRegularExpression re3(R"((\d\d\d\d)-(\d\d)-(\d\d))");
+    match = re3.match(name);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(1).toInt(),
+                match.captured(2).toInt(),
+                match.captured(3).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    QRegularExpression re4(R"((\d\d).(\d\d).(\d\d\d\d))");
+    match = re4.match(dir);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(3).toInt(),
+                match.captured(2).toInt(),
+                match.captured(1).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    // dir
+
+    QRegularExpression re5(R"((\d\d\d\d)-(\d\d)-(\d\d))");
+    match = re5.match(dir);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(1).toInt(),
+                match.captured(2).toInt(),
+                match.captured(3).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    QRegularExpression re6(R"((\d\d).(\d\d).(\d\d\d\d))");
+    match = re6.match(dir);
+
+    if (match.hasMatch()) {
+        QDate imageDate =
+            QDate(
+                match.captured(3).toInt(),
+                match.captured(2).toInt(),
+                match.captured(1).toInt());
+        if(!imageDate.isNull()) {
+            return imageDate;
+        }
+    }
+
+    return QDate();
 }
 
 

@@ -34,6 +34,7 @@ signals:
 
 private:
     void search();
+    QDate dateFromFileName(const QString& dir, const QString& name);
 
 private:
     int m_yearsAgo;
