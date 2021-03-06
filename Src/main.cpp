@@ -6,6 +6,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("dilishes");
+    QCoreApplication::setOrganizationDomain("dilishes.de");
+    QCoreApplication::setApplicationName("YearsAgo");
     View w;
     w.show();
     return a.exec();

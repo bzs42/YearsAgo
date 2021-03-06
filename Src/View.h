@@ -17,11 +17,19 @@ public:
     View(QWidget *parent = nullptr);
     ~View();
 
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
 signals:
     void imageFolderChanged(QString folder);
+
+private slots:
+    void setImage(const QImage& value);
 
 private:
     Ui::View* m_ui;
     ViewModel m_viewmodel;
+
 };
 #endif // VIEW_H

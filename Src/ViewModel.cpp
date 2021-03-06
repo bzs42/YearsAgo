@@ -5,12 +5,10 @@
 
 ViewModel::ViewModel()
 {
-    connect(
-        &m_model, &Model::imageOneYearAgoChanged,
-        [this]() {
-            emit imageOneYearAgoChanged(imageOneYearAgo());
-        });
-    QTimer::singleShot(10, &m_model, SLOT(setDate(QDate())));
+    connect(&m_model, &Model::imageOneYearAgoChanged, this, &ViewModel::imageOneYearAgoChanged);
+
+    //QTimer::singleShot(10, &m_model, SLOT(setDate(QDate::currentDate())));
+    QTimer::singleShot(10, this,[this](){ m_model.setDate(QDate::currentDate());});
 }
 
 auto ViewModel::canBrowse() const -> bool
@@ -28,9 +26,9 @@ auto ViewModel::imageFolder() const -> QString
     return m_model.imageFolder();
 }
 
-QPixmap ViewModel::imageOneYearAgo() const
+QImage ViewModel::imageOneYearAgo() const
 {
-    return QPixmap::fromImage(m_model.imageOneYearAgo());
+    return m_model.imageOneYearAgo();
 }
 
 void ViewModel::browse()

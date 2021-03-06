@@ -19,10 +19,13 @@ public:
     QImage imageOneYearAgo() const;
 
 public slots:
-    void setDate(QDate value);
+    void setDate(const QDate& value);
 
 signals:
     void imageOneYearAgoChanged(const QImage& value);
+
+private:
+    void search();
 
 private:
     QDate m_date;

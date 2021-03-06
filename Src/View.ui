@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QFrame" name="frame">
+    <widget class="QFrame" name="frameSettings">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -48,7 +48,26 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame_2">
+    <widget class="QFrame" name="frameDate">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="labelDate">
+        <property name="text">
+         <string>TextLabel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="frameImage">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -72,6 +91,9 @@
         </property>
         <property name="text">
          <string>Image</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>

@@ -2,6 +2,7 @@
 #include "./ui_View.h"
 
 #include <QFileDialog>
+#include <QSettings>
 
 View::View(QWidget *parent)
     : QDialog(parent)
@@ -9,12 +10,17 @@ View::View(QWidget *parent)
 {
     m_ui->setupUi(this);
 
+    QSettings settings;
+    restoreGeometry(settings.value("geometry").toByteArray());
+
     m_ui->pushButtonBrowse->setEnabled(m_viewmodel.canBrowse());
     connect(&m_viewmodel, &ViewModel::canBrowseChanged, m_ui->pushButtonBrowse, &QPushButton::setEnabled);
 
-    m_ui->labelImagePlaceholder->setScaledContents(true);
-    m_ui->labelImagePlaceholder->setPixmap(m_viewmodel.imageOneYearAgo());
-    connect(&m_viewmodel, &ViewModel::imageOneYearAgoChanged, m_ui->labelImagePlaceholder, &QLabel::setPixmap);
+    // TODO: initial scale
+    //m_ui->labelImagePlaceholder->setScaledContents(true);
+    //m_ui->labelImagePlaceholder->setPixmap(QPixmap::fromImage(m_viewmodel.imageOneYearAgo()));
+    setImage(m_viewmodel.imageOneYearAgo());
+    connect(&m_viewmodel, &ViewModel::imageOneYearAgoChanged, this, &View::setImage);
 
     m_ui->lineEditImageFolder->setText(m_viewmodel.imageFolder());
     m_ui->lineEditImageFolder->setEnabled(m_viewmodel.canImageFolder());
@@ -34,6 +40,22 @@ View::View(QWidget *parent)
 
 View::~View()
 {
+    QSettings settings;
+    settings.setValue("geometry", saveGeometry());
     delete m_ui;
 }
 
+void View::setImage(const QImage& value)
+{
+    QSize size = m_ui->labelImagePlaceholder->size();
+    m_ui->labelImagePlaceholder->setPixmap(
+        QPixmap::fromImage(value).scaled(
+            size.width(), size.height(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+
+void View::resizeEvent(QResizeEvent* event)
+{
+    QDialog::resizeEvent(event);
+    setImage(m_viewmodel.imageOneYearAgo());
+}
