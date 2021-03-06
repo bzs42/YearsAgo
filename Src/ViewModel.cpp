@@ -5,7 +5,9 @@
 
 ViewModel::ViewModel()
 {
-    connect(&m_model, &Model::imageOneYearAgoChanged, this, &ViewModel::imageOneYearAgoChanged);
+    connect(&m_model, &Model::imageYearsAgoChanged, this, &ViewModel::imageYearsAgoChanged);
+    connect(&m_model, &Model::matchCountChanged, this, &ViewModel::matchCountChanged);
+    connect(&m_model, &Model::dateChanged, this, &ViewModel::dateChanged);
 
     //QTimer::singleShot(10, &m_model, SLOT(setDate(QDate::currentDate())));
     QTimer::singleShot(10, this,[this](){ m_model.setDate(QDate::currentDate());});
@@ -26,9 +28,34 @@ auto ViewModel::imageFolder() const -> QString
     return m_model.imageFolder();
 }
 
-QImage ViewModel::imageOneYearAgo() const
+QImage ViewModel::imageYearsAgo() const
 {
-    return m_model.imageOneYearAgo();
+    return m_model.imageYearsAgo();
+}
+
+QDate ViewModel::date() const
+{
+    return m_model.date();
+}
+
+bool ViewModel::canYearsAgo() const
+{
+    return true;
+}
+
+int ViewModel::yearsAgo() const
+{
+    return m_model.yearsAgo();
+}
+
+int ViewModel::minYearsAgo() const
+{
+    return 1;
+}
+
+int ViewModel::maxYearsAgo() const
+{
+    return 80;
 }
 
 void ViewModel::browse()
@@ -44,4 +71,9 @@ void ViewModel::setImageFolder(const QString& value)
 
     m_model.setImageFolder(value);
     emit imageFolderChanged(m_model.imageFolder());
+}
+
+void ViewModel::setYearsAgo(int value)
+{
+    m_model.setYearsAgo(value);
 }

@@ -8,9 +8,9 @@
 #include <QSettings>
 
 Model::Model()
+    : m_yearsAgo(1)
 {
-    // TODO: load settings
-    m_imageOneYearAgo = QImage(":/DummyImage.png");
+    m_imageYearsAgo = QImage(":/DummyImage.png");
 
     QSettings settings;
     m_imageFolder = settings.value("imageFolder", QString()).toString();
@@ -36,9 +36,14 @@ void Model::setImageFolder(const QString& value)
     search();
 }
 
-QImage Model::imageOneYearAgo() const
+QImage Model::imageYearsAgo() const
 {
-    return m_imageOneYearAgo;
+    return m_imageYearsAgo;
+}
+
+QDate Model::date() const
+{
+    return m_date;
 }
 
 void Model::setDate(const QDate& value)
@@ -47,11 +52,29 @@ void Model::setDate(const QDate& value)
         return;
     }
     m_date = value;
+    emit dateChanged(m_date);
+    search();
+}
+
+int Model::yearsAgo() const
+{
+    return m_yearsAgo;
+}
+
+void Model::setYearsAgo(int value)
+{
+    if( m_yearsAgo == value) {
+        return;
+    }
+    m_yearsAgo = value;
     search();
 }
 
 void Model::search()
 {
+    // TODO [ab]: start as a separate thread
+    // TODO [ab]: add more regular expressions
+
     if (m_date.isNull()) {
         return;
     }
@@ -61,9 +84,8 @@ void Model::search()
 
     QDirIterator it(m_imageFolder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
     QRegularExpression re(R"(^(\d\d\d\d)(\d\d)(\d\d)_)");
-    QDate yearAgo = m_date.addYears(-1);
-    QVector<QString> sameDate;
-    QVector<QString> nearest;
+    QDate yearAgo = m_date.addYears(-m_yearsAgo);
+    m_sameDateMatches.clear();
 
     while (it.hasNext())
     {
@@ -91,28 +113,26 @@ void Model::search()
         qDebug() << imageDate << days;
 
         if (days==0) {
-            sameDate.append(it.filePath());
+            m_sameDateMatches.append(it.filePath());
 
-            if (sameDate.size() > 1) {
+            if (m_sameDateMatches.size() > 1) {
                 continue;
             }
 
             // need image reader to handle jpg orientation, QImage doesn't do it
             QImageReader reader(it.filePath());
             reader.setAutoTransform(true);
-            m_imageOneYearAgo = reader.read();
-            Q_ASSERT(!m_imageOneYearAgo.isNull());
-            emit imageOneYearAgoChanged(m_imageOneYearAgo);
+            m_imageYearsAgo = reader.read();
+            Q_ASSERT(!m_imageYearsAgo.isNull());
+            emit imageYearsAgoChanged(m_imageYearsAgo);
             qDebug() << "image found";
 
             continue;
         }
-
-        if (days > -15 && days < 15) {
-            nearest.append(it.fileName());
-        }
     }
 
-    qDebug() << "same date found" << sameDate.size();
-    qDebug() << "nearest found" << nearest.size();
+    qDebug() << "same date found" << m_sameDateMatches.size();
+    emit matchCountChanged(m_sameDateMatches.size());
 }
+
+

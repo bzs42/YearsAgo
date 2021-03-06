@@ -15,23 +15,28 @@ public:
 
     QString imageFolder() const;
     void setImageFolder(const QString& value);
-
-    QImage imageOneYearAgo() const;
+    QImage imageYearsAgo() const;
+    int yearsAgo() const;
+    QDate date() const;
 
 public slots:
     void setDate(const QDate& value);
+    void setYearsAgo(int value);
 
 signals:
-    void imageOneYearAgoChanged(const QImage& value);
+    void imageYearsAgoChanged(const QImage& value);
+    void matchCountChanged(int);
+    void dateChanged(const QDate& value);
 
 private:
     void search();
 
 private:
+    int m_yearsAgo;
     QDate m_date;
     QString m_imageFolder;
-    QImage m_imageOneYearAgo;
-
+    QImage m_imageYearsAgo;
+    QVector<QString> m_sameDateMatches;
 };
 
 #endif // MODEL_H
