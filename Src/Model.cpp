@@ -59,39 +59,60 @@ void Model::search()
         return;
     }
 
-    QRegularExpression re("(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)_");
-
     QDirIterator it(m_imageFolder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
-
+    QRegularExpression re(R"(^(\d\d\d\d)(\d\d)(\d\d)_)");
+    QDate yearAgo = m_date.addYears(-1);
+    QVector<QString> sameDate;
     QVector<QString> nearest;
 
-    while (it.hasNext()) {
-        qDebug() << it.next();
-        //qDebug() << it.fileInfo().birthTime();
-        qDebug() << it.fileName();
+    while (it.hasNext())
+    {
+        it.next();
         qDebug() << it.filePath();
+
         QRegularExpressionMatch match = re.match(it.fileName());
-        if (match.hasMatch()) {
-            QString year = match.captured(1);
-            QString month = match.captured(2);
-            QString day = match.captured(3);
-            QDate imageDate = QDate(year.toInt(), month.toInt(), day.toInt());
-            qDebug() << imageDate;
-            qint64 days = m_date.daysTo(imageDate);
-            qDebug() << days;
-            if (days==0) {
-                // need image reader to handle jpg orientation, QImage doesn't do it
-                QImageReader reader(it.filePath());
-                reader.setAutoTransform(true);
-                m_imageOneYearAgo = reader.read();
-                Q_ASSERT(!m_imageOneYearAgo.isNull());
-                emit imageOneYearAgoChanged(m_imageOneYearAgo);
-                qDebug() << "image found";
-                return;
+
+        if (!match.hasMatch()) {
+            qDebug() << "no match";
+            continue;
+        }
+
+        QString year = match.captured(1);
+        QString month = match.captured(2);
+        QString day = match.captured(3);
+
+        QDate imageDate = QDate(year.toInt(), month.toInt(), day.toInt());
+        if (imageDate.isNull()) {
+            qDebug() << "invalid date, skipped" << year << month << day;
+            continue;
+        }
+
+        qint64 days = yearAgo.daysTo(imageDate);
+        qDebug() << imageDate << days;
+
+        if (days==0) {
+            sameDate.append(it.filePath());
+
+            if (sameDate.size() > 1) {
+                continue;
             }
-            if (days > -15 && days < 15) {
-                nearest.append(it.fileName());
-            }
+
+            // need image reader to handle jpg orientation, QImage doesn't do it
+            QImageReader reader(it.filePath());
+            reader.setAutoTransform(true);
+            m_imageOneYearAgo = reader.read();
+            Q_ASSERT(!m_imageOneYearAgo.isNull());
+            emit imageOneYearAgoChanged(m_imageOneYearAgo);
+            qDebug() << "image found";
+
+            continue;
+        }
+
+        if (days > -15 && days < 15) {
+            nearest.append(it.fileName());
         }
     }
+
+    qDebug() << "same date found" << sameDate.size();
+    qDebug() << "nearest found" << nearest.size();
 }
