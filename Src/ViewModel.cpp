@@ -6,8 +6,16 @@
 ViewModel::ViewModel()
 {
     connect(&m_model, &Model::imageYearsAgoChanged, this, &ViewModel::imageYearsAgoChanged);
-    connect(&m_model, &Model::matchCountChanged, this, &ViewModel::matchCountChanged);
     connect(&m_model, &Model::dateChanged, this, &ViewModel::dateChanged);
+
+    connect(&m_model, &Model::matchCountChanged, this, &ViewModel::matchCountChanged);
+    connect(
+        &m_model, &Model::matchCountChanged, this,
+        [this](int value) {
+            m_matchCount = value;
+            m_matchNumber = 0;
+            emit canNextImageChanged(m_matchCount != 0);
+        });
 
     //QTimer::singleShot(10, &m_model, SLOT(setDate(QDate::currentDate())));
     QTimer::singleShot(10, this,[this](){ m_model.setDate(QDate::currentDate());});
@@ -30,7 +38,7 @@ auto ViewModel::imageFolder() const -> QString
 
 QImage ViewModel::imageYearsAgo() const
 {
-    return m_model.imageYearsAgo();
+    return m_model.imageYearsAgo(m_matchNumber);
 }
 
 QDate ViewModel::date() const
@@ -58,9 +66,24 @@ int ViewModel::maxYearsAgo() const
     return 80;
 }
 
-void ViewModel::browse()
+bool ViewModel::canNextImage() const
 {
-    // TODO
+    if(m_matchCount > 0) {
+        return true;
+    }
+    return false;
+}
+
+void ViewModel::doNextImage()
+{
+    if(!canNextImage()) {
+        return;
+    }
+    m_matchNumber++;
+    if(m_matchNumber >= m_matchCount) {
+        m_matchNumber = 0;
+    }
+    emit imageYearsAgoChanged(m_model.imageYearsAgo(m_matchNumber));
 }
 
 void ViewModel::setImageFolder(const QString& value)

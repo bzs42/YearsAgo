@@ -10,6 +10,7 @@ View::View(QWidget *parent)
 {
     setWindowFlag(Qt::WindowMinimizeButtonHint, true);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
+    setWindowTitle(qApp->applicationDisplayName());
 
     m_ui->setupUi(this);
 
@@ -40,6 +41,11 @@ View::View(QWidget *parent)
         [this](int value) {
             m_ui->labelMatchCount->setText(QString::number(value));
         });
+
+    // pushButton nextImage
+    m_ui->pushButtonShowNext->setEnabled(m_viewmodel.canNextImage());
+    connect(&m_viewmodel, &ViewModel::canNextImageChanged, m_ui->pushButtonShowNext, &QPushButton::setEnabled);
+    connect(m_ui->pushButtonShowNext, &QPushButton::clicked, &m_viewmodel, &ViewModel::doNextImage);
 
     // image
     // TODO: initial scale

@@ -15,7 +15,8 @@ public:
 
     QString imageFolder() const;
     void setImageFolder(const QString& value);
-    QImage imageYearsAgo() const;
+    // return the matched image with count, else invalid image
+    QImage imageYearsAgo(int matchNumber = 0) const;
     int yearsAgo() const;
     QDate date() const;
 
@@ -24,8 +25,11 @@ public slots:
     void setYearsAgo(int value);
 
 signals:
+    // emmited during search
     void imageYearsAgoChanged(const QImage& value);
+    // emitted after search
     void matchCountChanged(int);
+    // emmited when date is changed
     void dateChanged(const QDate& value);
 
 private:

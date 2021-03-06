@@ -36,9 +36,21 @@ void Model::setImageFolder(const QString& value)
     search();
 }
 
-QImage Model::imageYearsAgo() const
+QImage Model::imageYearsAgo(int matchNumber) const
 {
-    return m_imageYearsAgo;
+    if(matchNumber == 0) {
+        return m_imageYearsAgo;
+    }
+
+    if(matchNumber > 0 && matchNumber < m_sameDateMatches.size()) {
+        QImageReader reader(m_sameDateMatches[matchNumber]);
+        reader.setAutoTransform(true);
+        QImage image = reader.read();
+        Q_ASSERT(!image.isNull());
+        return image;
+    }
+
+    return QImage();
 }
 
 QDate Model::date() const

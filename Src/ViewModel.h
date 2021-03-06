@@ -30,8 +30,10 @@ public:
     int minYearsAgo() const;
     int maxYearsAgo() const;
 
+    bool canNextImage() const;
+
 public slots:
-    void browse();
+    void doNextImage();
     void setImageFolder(const QString& value);
     void setYearsAgo(int value);
 
@@ -44,9 +46,12 @@ signals:
     void imageYearsAgoChanged(const QImage& value);
     void matchCountChanged(int value);
     void dateChanged(const QDate& value);
+    void canNextImageChanged(bool value);
 
 private:
     Model m_model;
+    int m_matchCount;
+    int m_matchNumber;
 };
 
 #endif // VIEWMODEL_H
