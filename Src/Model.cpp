@@ -99,12 +99,18 @@ void Model::search()
     QDate yearAgo = m_date.addYears(-m_yearsAgo);
     m_sameDateMatches.clear();
 
+    int images = 0;
+    int imagesFailed = 0;
+
     while (it.hasNext())
     {
         it.next();
 
+        images++;
+
         QDate imageDate = dateFromFileName(it.fileInfo().absolutePath(), it.fileName());
         if (imageDate.isNull()) {
+            imagesFailed++;
             qDebug() << it.fileInfo().absolutePath() << it.fileName() << "invalid date, skipped";
             continue;
         }
@@ -132,6 +138,9 @@ void Model::search()
     }
 
     qDebug() << "same date found" << m_sameDateMatches.size();
+    qDebug() << "images found" << images;
+    qDebug() << "images no date match" << imagesFailed;
+
     emit matchCountChanged(m_sameDateMatches.size());
 }
 
