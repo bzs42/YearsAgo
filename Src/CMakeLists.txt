@@ -56,3 +56,89 @@ else()
 endif()
 
 target_link_libraries(YearsAgo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+if(WIN32)
+    # use WinMain() entry point to hide console window and make a GUI application
+    set_target_properties(YearsAgo PROPERTIES WIN32_EXECUTABLE TRUE)
+
+    # install
+
+    get_target_property(_QmakeExecutable Qt5::qmake IMPORTED_LOCATION)
+    get_filename_component(_QtBinDir "${_QmakeExecutable}" DIRECTORY)
+    find_program(_WindeployExecutable windeployqt HINTS "${_QtBinDir}")
+    message(VERBOSE "_WindeployExecutable:"         ${_WindeployExecutable})
+
+    if (_WindeployExecutable)
+        add_custom_command(
+            TARGET YearsAgo
+            POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/windeployqt"
+            COMMAND "${CMAKE_COMMAND}" -E
+                env PATH="${_QtBinDir}" "${_WindeployExecutable}"
+                    --verbose 1
+                    --dir \"${CMAKE_CURRENT_BINARY_DIR}/windeployqt\"
+                    #--qmldir \"${PROJECT_SOURCE_DIR}/src/qml\"
+                    #--no-compiler-runtime
+                    --compiler-runtime
+                    \"$<TARGET_FILE:YearsAgo>\"
+            COMMENT "Execute windeployqt..."
+        )
+    endif()
+
+    install(
+        TARGETS YearsAgo
+        DESTINATION bin
+        COMPONENT _ComponentApplication
+    )
+
+    install(
+        DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/windeployqt/"
+        DESTINATION bin
+        COMPONENT _ComponentApplication
+    )
+
+    install(
+        FILES
+        "${PROJECT_SOURCE_DIR}/LICENSE.GPL3-EXCEPT.txt"
+        "${PROJECT_SOURCE_DIR}/LICENSE.LGPL3.txt"
+        "${PROJECT_SOURCE_DIR}/LICENSE.BSD-3-Clause.txt"
+        DESTINATION .
+        COMPONENT _ComponentApplication
+    )
+
+    # packaging
+
+    set(CPACK_GENERATOR "IFW" "ZIP")
+    set(CPACK_PACKAGE_NAME "YearsAgo")
+    set(CPACK_PACKAGE_VENDOR "${PROJECT_HOMEPAGE_URL}")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+    set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+    set(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "dilishes/YearsAgo")
+    set(CPACK_PACKAGE_EXECUTABLES "YearsAgo" "Years Ago Application")
+    set(CPACK_COMPONENTS_ALL _ComponentApplication)
+    set(CPACK_IFW_TARGET_DIRECTORY "@ApplicationsDirX64@/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+    set(CPACK_IFW_PACKAGE_START_MENU_DIRECTORY "dilishes")
+    set(CPACK_IFW_VERBOSE ON)
+
+    include(CPack REQUIRED)
+    include(CPackIFW REQUIRED)
+
+    cpack_add_component(
+        _ComponentApplication
+        DISPLAY_NAME "Years Ago"
+        DESCRIPTION "shows images from years ago"
+        REQUIRED
+    )
+
+    cpack_ifw_configure_component(_ComponentApplication
+        NAME de.igniti.bonusapp
+        LICENSES "GPL" "${PROJECT_SOURCE_DIR}/LICENSE.GPL3-EXCEPT.txt"
+        LICENSES "LGPL" "${PROJECT_SOURCE_DIR}/LICENSE.LGPL3.txt"
+        LICENSES "BSD-3" "${PROJECT_SOURCE_DIR}/LICENSE.BSD-3-Clause.txt"
+        DEFAULT TRUE
+        SCRIPT "${PROJECT_SOURCE_DIR}/InstallScript.qs"
+    )
+endif()
