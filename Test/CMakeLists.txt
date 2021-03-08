@@ -12,6 +12,10 @@ add_executable(ModelTest
     ${CMAKE_SOURCE_DIR}/Src/res.qrc
     ${CMAKE_SOURCE_DIR}/Src/Model.cpp
     ${CMAKE_SOURCE_DIR}/Src/Model.h
+    ${CMAKE_SOURCE_DIR}/Src/SearchThread.h
+    ${CMAKE_SOURCE_DIR}/Src/SearchThread.cpp
+    ${CMAKE_SOURCE_DIR}/Src/SearchAlgorithm.h
+    ${CMAKE_SOURCE_DIR}/Src/SearchAlgorithm.cpp
     ModelTest.h
     ModelTest.cpp
 )

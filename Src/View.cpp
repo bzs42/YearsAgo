@@ -10,7 +10,7 @@ View::View(QWidget *parent)
 {
     setWindowFlag(Qt::WindowMinimizeButtonHint, true);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
-    setWindowTitle(qApp->applicationDisplayName());
+
 
     m_ui->setupUi(this);
 
@@ -71,6 +71,14 @@ View::View(QWidget *parent)
             {
                 m_viewmodel.setImageFolder(dir);
             }
+        });
+
+    // window title
+    setWindowTitle(QString::number(m_viewmodel.yearsAgo()) + QString(" Years ago"));
+    connect(
+        m_ui->spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this,
+        [this]() {
+            setWindowTitle(QString::number(m_viewmodel.yearsAgo()) + QString(" Years ago"));
         });
 }
 

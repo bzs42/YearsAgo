@@ -7,6 +7,9 @@
 #include <QRegularExpression>
 #include <QSettings>
 
+#include "SearchThread.h"
+#include "SearchAlgorithm.h"
+
 Model::Model()
     : m_yearsAgo(1)
 {
@@ -85,7 +88,10 @@ void Model::setYearsAgo(int value)
 void Model::search()
 {
     // TODO [ab]: start as a separate thread
-    // TODO [ab]: retrieve date from filepath, not only name
+    //SearchThread* searchThread = new SearchThread();
+    //connect(searchThread, &SearchThread::resultReady, this, &Model::handleResults);
+    //connect(searchThread, &SearchThread::finished, searchThread, &QObject::deleteLater);
+    //searchThread->start();
 
     if (m_date.isNull()) {
         return;
@@ -94,145 +100,27 @@ void Model::search()
         return;
     }
 
-    QDirIterator it(m_imageFolder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
-
-    QDate yearAgo = m_date.addYears(-m_yearsAgo);
+    m_imageYearsAgo = QImage(":/DummyImage.png");
     m_sameDateMatches.clear();
+    emit imageYearsAgoChanged(m_imageYearsAgo);
 
-    int images = 0;
-    int imagesFailed = 0;
+    SearchAlgorithm algorithm(m_imageFolder, m_date.addYears(-m_yearsAgo));
+    m_sameDateMatches = algorithm.search();
 
-    while (it.hasNext())
-    {
-        it.next();
-
-        images++;
-
-        QDate imageDate = dateFromFileName(it.fileInfo().absolutePath(), it.fileName());
-        if (imageDate.isNull()) {
-            imagesFailed++;
-            qDebug() << it.fileInfo().absolutePath() << it.fileName() << "invalid date, skipped";
-            continue;
-        }
-
-        qint64 days = yearAgo.daysTo(imageDate);
-        //qDebug() << imageDate << days;
-
-        if (days==0) {
-            m_sameDateMatches.append(it.filePath());
-
-            if (m_sameDateMatches.size() > 1) {
-                continue;
-            }
-
-            // need image reader to handle jpg orientation, QImage doesn't do it
-            QImageReader reader(it.filePath());
-            reader.setAutoTransform(true);
-            m_imageYearsAgo = reader.read();
-            Q_ASSERT(!m_imageYearsAgo.isNull());
-            emit imageYearsAgoChanged(m_imageYearsAgo);
-            qDebug() << "image found";
-
-            continue;
-        }
+    if(m_sameDateMatches.isEmpty()) {
+        // TODO: emit no result image
+        emit matchCountChanged(0);
+        return;
     }
 
-    qDebug() << "same date found" << m_sameDateMatches.size();
-    qDebug() << "images found" << images;
-    qDebug() << "images no date match" << imagesFailed;
+    // need image reader to handle jpg orientation, QImage doesn't do it
+    QImageReader reader(m_sameDateMatches[0]);
+    reader.setAutoTransform(true);
+    m_imageYearsAgo = reader.read();
+    Q_ASSERT(!m_imageYearsAgo.isNull());
+    emit imageYearsAgoChanged(m_imageYearsAgo);
 
     emit matchCountChanged(m_sameDateMatches.size());
-}
-
-QDate Model::dateFromFileName(const QString& dir, const QString& name)
-{
-    QRegularExpression re1(R"((\d\d\d\d)(\d\d)(\d\d))");
-    QRegularExpressionMatch match = re1.match(name);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(1).toInt(),
-                match.captured(2).toInt(),
-                match.captured(3).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    QRegularExpression re2(R"(^(\d\d)(\d\d)(\d\d)_)");
-    match = re2.match(name);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(1).toInt(),
-                match.captured(2).toInt(),
-                match.captured(3).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    QRegularExpression re3(R"((\d\d\d\d)-(\d\d)-(\d\d))");
-    match = re3.match(name);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(1).toInt(),
-                match.captured(2).toInt(),
-                match.captured(3).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    QRegularExpression re4(R"((\d\d).(\d\d).(\d\d\d\d))");
-    match = re4.match(dir);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(3).toInt(),
-                match.captured(2).toInt(),
-                match.captured(1).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    // dir
-
-    QRegularExpression re5(R"((\d\d\d\d)-(\d\d)-(\d\d))");
-    match = re5.match(dir);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(1).toInt(),
-                match.captured(2).toInt(),
-                match.captured(3).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    QRegularExpression re6(R"((\d\d).(\d\d).(\d\d\d\d))");
-    match = re6.match(dir);
-
-    if (match.hasMatch()) {
-        QDate imageDate =
-            QDate(
-                match.captured(3).toInt(),
-                match.captured(2).toInt(),
-                match.captured(1).toInt());
-        if(!imageDate.isNull()) {
-            return imageDate;
-        }
-    }
-
-    return QDate();
 }
 
 

@@ -30,6 +30,10 @@ set(PROJECT_SOURCES
         View.ui
         ViewModel.cpp
         ViewModel.h
+        SearchAlgorithm.cpp
+        SearchAlgorithm.h
+        SearchThread.cpp
+        SearchThread.h
         Res.qrc
         main.cpp
         ${TS_FILES}
