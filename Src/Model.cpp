@@ -8,7 +8,7 @@
 #include <QSettings>
 
 #include "SearchThread.h"
-#include "SearchAlgorithm.h"
+
 
 Model::Model()
     : m_yearsAgo(1)
@@ -17,6 +17,8 @@ Model::Model()
 
     QSettings settings;
     m_imageFolder = settings.value("imageFolder", QString()).toString();
+
+    qRegisterMetaType<QVector<QString>>("QVector<QString>");
 }
 
 Model::~Model()
@@ -85,27 +87,9 @@ void Model::setYearsAgo(int value)
     search();
 }
 
-void Model::search()
+void Model::onSearchResultReady(QVector<QString> value)
 {
-    // TODO [ab]: start as a separate thread
-    //SearchThread* searchThread = new SearchThread();
-    //connect(searchThread, &SearchThread::resultReady, this, &Model::handleResults);
-    //connect(searchThread, &SearchThread::finished, searchThread, &QObject::deleteLater);
-    //searchThread->start();
-
-    if (m_date.isNull()) {
-        return;
-    }
-    if (m_imageFolder.isEmpty()) {
-        return;
-    }
-
-    m_imageYearsAgo = QImage(":/DummyImage.png");
-    m_sameDateMatches.clear();
-    emit imageYearsAgoChanged(m_imageYearsAgo);
-
-    SearchAlgorithm algorithm(m_imageFolder, m_date.addYears(-m_yearsAgo));
-    m_sameDateMatches = algorithm.search();
+    m_sameDateMatches = value;
 
     if(m_sameDateMatches.isEmpty()) {
         // TODO: emit no result image
@@ -121,6 +105,29 @@ void Model::search()
     emit imageYearsAgoChanged(m_imageYearsAgo);
 
     emit matchCountChanged(m_sameDateMatches.size());
+}
+
+void Model::search()
+{
+    if (m_date.isNull()) {
+        return;
+    }
+    if (m_imageFolder.isEmpty()) {
+        return;
+    }
+
+    // TODO: check if thread is running
+
+    m_imageYearsAgo = QImage(":/DummyImage.png");
+    m_sameDateMatches.clear();
+    // TODO: emit search start image
+    emit imageYearsAgoChanged(m_imageYearsAgo);
+
+    SearchThread* searchThread =
+        new SearchThread(m_imageFolder, m_date.addYears(-m_yearsAgo), this);
+    connect(searchThread, &SearchThread::searchResultReady, this, &Model::onSearchResultReady);
+    connect(searchThread, &SearchThread::finished, searchThread, &QObject::deleteLater);
+    searchThread->start();
 }
 
 

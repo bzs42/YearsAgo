@@ -34,7 +34,6 @@ QVector<QString> SearchAlgorithm::search()
         }
 
         qint64 days = m_date.daysTo(imageDate);
-        //qDebug() << imageDate << days;
 
         if (days==0) {
             sameDateMatches.append(it.filePath());

@@ -23,6 +23,7 @@ public:
 public slots:
     void setDate(const QDate& value);
     void setYearsAgo(int value);
+    void onSearchResultReady(QVector<QString> value);
 
 signals:
     // emmited during search

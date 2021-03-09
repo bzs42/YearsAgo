@@ -1,7 +1,19 @@
 #include "SearchThread.h"
 
-void SearchThread::run()
+#include <SearchAlgorithm.h>
+
+SearchThread::SearchThread(const QString& folder, const QDate& date, QObject* parent)
+    : QThread(parent)
+    , m_folder(folder)
+    , m_date(date)
 {
 
-    emit resultReady();
+}
+
+void SearchThread::run()
+{
+    SearchAlgorithm algorithm(m_folder, m_date);
+    QVector<QString> sameDateMatches = algorithm.search();
+
+    emit searchResultReady(sameDateMatches);
 }

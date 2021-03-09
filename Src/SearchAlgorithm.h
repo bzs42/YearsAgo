@@ -8,7 +8,7 @@
 class SearchAlgorithm
 {
 public:
-    //SearchAlgorithm() = delete;
+    SearchAlgorithm() = delete;
     SearchAlgorithm(const QString& folder, const QDate& date);
     QVector<QString> search();
 
