@@ -2,6 +2,7 @@
 #include "./ui_View.h"
 
 #include <QFileDialog>
+#include <QKeyEvent>
 #include <QSettings>
 
 View::View(QWidget *parent)
@@ -30,6 +31,7 @@ View::View(QWidget *parent)
     m_ui->spinBox->setMinimum(m_viewmodel.minYearsAgo());
     m_ui->spinBox->setValue(m_viewmodel.yearsAgo());
     m_ui->spinBox->setEnabled(m_viewmodel.canYearsAgo());
+    m_ui->spinBox->setFocusPolicy(Qt::NoFocus);
     connect(&m_viewmodel, &ViewModel::canYearsAgoChanged, m_ui->spinBox, &QSpinBox::setEnabled);
     connect(
         m_ui->spinBox, QOverload<int>::of(&QSpinBox::valueChanged), &m_viewmodel, &ViewModel::setYearsAgo);
@@ -44,6 +46,7 @@ View::View(QWidget *parent)
 
     // pushButton nextImage
     m_ui->pushButtonShowNext->setEnabled(m_viewmodel.canNextImage());
+    m_ui->pushButtonShowNext->setFocusPolicy(Qt::NoFocus);
     connect(&m_viewmodel, &ViewModel::canNextImageChanged, m_ui->pushButtonShowNext, &QPushButton::setEnabled);
     connect(m_ui->pushButtonShowNext, &QPushButton::clicked, &m_viewmodel, &ViewModel::doNextImage);
 
@@ -61,6 +64,7 @@ View::View(QWidget *parent)
 
     // pushButton browse
     m_ui->pushButtonBrowse->setEnabled(m_viewmodel.canBrowse());
+    m_ui->pushButtonBrowse->setFocusPolicy(Qt::NoFocus);
     connect(&m_viewmodel, &ViewModel::canBrowseChanged, m_ui->pushButtonBrowse, &QPushButton::setEnabled);
     connect(
         m_ui->pushButtonBrowse, &QPushButton::clicked, this,
@@ -101,4 +105,21 @@ void View::resizeEvent(QResizeEvent* event)
 {
     QDialog::resizeEvent(event);
     setImage(m_viewmodel.imageYearsAgo());
+}
+
+void View::keyPressEvent(QKeyEvent* event)
+{
+    if(event->key() == Qt::Key_Down) {
+        m_ui->spinBox->stepDown();
+        return;
+    }
+    if(event->key() == Qt::Key_Up) {
+        m_ui->spinBox->stepUp();
+        return;
+    }
+    if(event->key() == Qt::Key_Space) {
+        m_ui->pushButtonShowNext->click();
+        return;
+    }
+    QDialog::keyPressEvent(event);
 }
