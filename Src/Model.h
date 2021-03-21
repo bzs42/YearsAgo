@@ -39,6 +39,8 @@ signals:
 private:
     void search();
     QDate dateFromFileName(const QString& dir, const QString& name);
+    int getImageCount(int year) const;
+    QImage getImage(int year, int index) const;
 
 private:
     int m_yearsAgo;

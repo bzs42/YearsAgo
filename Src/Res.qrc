@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>SearchingFinished.png</file>
         <file>SearchingStarted.png</file>
+        <file>NoImageFound.png</file>
     </qresource>
 </RCC>
