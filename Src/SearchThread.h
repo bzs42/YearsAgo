@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QString>
 #include <QDate>
+#include <QMap>
 
 class SearchThread : public QThread
 {
@@ -13,12 +14,13 @@ class SearchThread : public QThread
 public:
     SearchThread() = delete;
     SearchThread(const QString& folder, const QDate& date, QObject* parent = nullptr);
+
     // QThread interface
 protected:
     void run() override;
 
 signals:
-    void searchResultReady(QVector<QString> value);
+    void searchResultReady(QMap<QString, QVector<QString>> value);
 
 private:
     QString m_folder;

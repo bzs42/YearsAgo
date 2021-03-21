@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>DummyImage.png</file>
+        <file>SearchingFinished.png</file>
+        <file>SearchingStarted.png</file>
     </qresource>
 </RCC>

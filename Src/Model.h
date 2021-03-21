@@ -3,6 +3,7 @@
 
 #include <QDate>
 #include <QImage>
+#include <QMap>
 #include <QObject>
 
 class Model : public QObject
@@ -23,7 +24,7 @@ public:
 public slots:
     void setDate(const QDate& value);
     void setYearsAgo(int value);
-    void onSearchResultReady(QVector<QString> value);
+    void onSearchResultReady(QMap<QString, QVector<QString>> value);
 
 signals:
     // emmited during search
@@ -32,6 +33,8 @@ signals:
     void matchCountChanged(int);
     // emmited when date is changed
     void dateChanged(const QDate& value);
+    void searchStarted();
+    void searchFinished();
 
 private:
     void search();
@@ -39,10 +42,11 @@ private:
 
 private:
     int m_yearsAgo;
+    bool m_isSearching;
     QDate m_date;
     QString m_imageFolder;
     QImage m_imageYearsAgo;
-    QVector<QString> m_sameDateMatches;
+    QMap<QString, QVector<QString>> m_sameDateMatches;
 };
 
 #endif // MODEL_H

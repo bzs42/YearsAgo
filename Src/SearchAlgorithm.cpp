@@ -11,11 +11,13 @@ SearchAlgorithm::SearchAlgorithm(const QString& folder, const QDate& date)
 
 }
 
-QVector<QString> SearchAlgorithm::search()
+void SearchAlgorithm::search()
 {
-    QDirIterator it(m_folder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
-
+    m_images.clear();
     QVector<QString> sameDateMatches;
+    QString year = QString::number(m_date.year());
+
+    QDirIterator it(m_folder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
 
     int images = 0;
     int imagesFailed = 0;
@@ -44,8 +46,14 @@ QVector<QString> SearchAlgorithm::search()
     qDebug() << "images found" << images;
     qDebug() << "images no date match" << imagesFailed;
 
-    // TODO: by reference or store
-    return sameDateMatches;
+    if(sameDateMatches.size() > 0) {
+        m_images.insert(year, sameDateMatches);
+    }
+}
+
+QMap<QString, QVector<QString>> SearchAlgorithm::getImages()
+{
+    return m_images;
 }
 
 QDate SearchAlgorithm::dateFromFileName(const QString& dir, const QString& name)

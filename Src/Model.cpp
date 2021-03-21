@@ -12,13 +12,12 @@
 
 Model::Model()
     : m_yearsAgo(1)
+    , m_isSearching(false)
 {
-    m_imageYearsAgo = QImage(":/DummyImage.png");
-
     QSettings settings;
     m_imageFolder = settings.value("imageFolder", QString()).toString();
 
-    qRegisterMetaType<QVector<QString>>("QVector<QString>");
+    qRegisterMetaType<QMap<QString, QVector<QString>>>("QMap<QString, QVector<QString>");
 }
 
 Model::~Model()
@@ -47,8 +46,15 @@ QImage Model::imageYearsAgo(int matchNumber) const
         return m_imageYearsAgo;
     }
 
-    if(matchNumber > 0 && matchNumber < m_sameDateMatches.size()) {
-        QImageReader reader(m_sameDateMatches[matchNumber]);
+    QString year = QString::number(m_date.addYears(-yearsAgo()).year());
+
+    if(!m_sameDateMatches.contains(year)) {
+        return QImage();
+    }
+
+    if(matchNumber > 0 && matchNumber < m_sameDateMatches.value(year).size())
+    {
+        QImageReader reader(m_sameDateMatches.value(year)[matchNumber]);
         reader.setAutoTransform(true);
         QImage image = reader.read();
         Q_ASSERT(!image.isNull());
@@ -87,24 +93,30 @@ void Model::setYearsAgo(int value)
     search();
 }
 
-void Model::onSearchResultReady(QVector<QString> value)
+void Model::onSearchResultReady(QMap<QString, QVector<QString>> value)
 {
+    m_isSearching = false;
+    emit searchFinished();
+
+    m_imageYearsAgo = QImage(":/SearchingFinished.png");
+
     m_sameDateMatches = value;
 
-    if(m_sameDateMatches.isEmpty()) {
-        // TODO: emit no result image
+    QString year = QString::number(m_date.addYears(-yearsAgo()).year());
+    if(!m_sameDateMatches.contains(year)) {
+        emit imageYearsAgoChanged(m_imageYearsAgo);
         emit matchCountChanged(0);
         return;
     }
 
     // need image reader to handle jpg orientation, QImage doesn't do it
-    QImageReader reader(m_sameDateMatches[0]);
+    QImageReader reader(m_sameDateMatches.value(year)[0]);
     reader.setAutoTransform(true);
     m_imageYearsAgo = reader.read();
     Q_ASSERT(!m_imageYearsAgo.isNull());
     emit imageYearsAgoChanged(m_imageYearsAgo);
 
-    emit matchCountChanged(m_sameDateMatches.size());
+    emit matchCountChanged(m_sameDateMatches.value(year).size());
 }
 
 void Model::search()
@@ -115,16 +127,17 @@ void Model::search()
     if (m_imageFolder.isEmpty()) {
         return;
     }
+    if(m_isSearching) {
+        return;
+    }
 
-    // TODO: check if thread is running
+    m_isSearching = true;
+    emit searchStarted();
 
-    m_imageYearsAgo = QImage(":/DummyImage.png");
-    m_sameDateMatches.clear();
-    // TODO: emit search start image
+    m_imageYearsAgo = QImage(":/SearchingStarted.png");
     emit imageYearsAgoChanged(m_imageYearsAgo);
 
-    SearchThread* searchThread =
-        new SearchThread(m_imageFolder, m_date.addYears(-m_yearsAgo), this);
+    auto* searchThread = new SearchThread(m_imageFolder, m_date.addYears(-m_yearsAgo), this);
     connect(searchThread, &SearchThread::searchResultReady, this, &Model::onSearchResultReady);
     connect(searchThread, &SearchThread::finished, searchThread, &QObject::deleteLater);
     searchThread->start();

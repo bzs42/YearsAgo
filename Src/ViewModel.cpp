@@ -4,6 +4,7 @@
 #include <QTimer>
 
 ViewModel::ViewModel()
+    : m_isBusy(false)
 {
     connect(&m_model, &Model::imageYearsAgoChanged, this, &ViewModel::imageYearsAgoChanged);
     connect(&m_model, &Model::dateChanged, this, &ViewModel::dateChanged);
@@ -15,6 +16,15 @@ ViewModel::ViewModel()
             m_matchCount = value;
             m_matchNumber = 0;
             emit canNextImageChanged(m_matchCount != 0);
+        });
+
+    connect(&m_model, &Model::searchStarted, this,
+        [this]() {
+            setBusy(true);
+        });
+    connect(&m_model, &Model::searchFinished, this,
+        [this]() {
+            setBusy(false);
         });
 
     //QTimer::singleShot(10, &m_model, SLOT(setDate(QDate::currentDate())));
@@ -48,6 +58,9 @@ QDate ViewModel::date() const
 
 bool ViewModel::canYearsAgo() const
 {
+    if(m_isBusy) {
+        return false;
+    }
     return true;
 }
 
@@ -68,6 +81,9 @@ int ViewModel::maxYearsAgo() const
 
 bool ViewModel::canNextImage() const
 {
+    if(m_isBusy) {
+        return false;
+    }
     if(m_matchCount > 0) {
         return true;
     }
@@ -98,5 +114,25 @@ void ViewModel::setImageFolder(const QString& value)
 
 void ViewModel::setYearsAgo(int value)
 {
+    if(!canYearsAgo()) {
+        return;
+    }
+    if(m_model.yearsAgo() == value) {
+        return;
+    }
     m_model.setYearsAgo(value);
+}
+
+void ViewModel::setBusy(bool value)
+{
+    if(m_isBusy == value ) {
+        return;
+    }
+
+    m_isBusy = value;
+
+    emit canBrowseChanged(canBrowse());
+    emit canImageFolderChanged(canImageFolder());
+    emit canNextImageChanged(canNextImage());
+    emit canYearsAgoChanged(canYearsAgo());
 }

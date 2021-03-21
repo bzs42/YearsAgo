@@ -36,6 +36,7 @@ public slots:
     void doNextImage();
     void setImageFolder(const QString& value);
     void setYearsAgo(int value);
+    void setBusy(bool value);
 
 signals:
     void canBrowseChanged(bool value);
@@ -52,6 +53,7 @@ private:
     Model m_model;
     int m_matchCount;
     int m_matchNumber;
+    bool m_isBusy;
 };
 
 #endif // VIEWMODEL_H

@@ -13,7 +13,6 @@ SearchThread::SearchThread(const QString& folder, const QDate& date, QObject* pa
 void SearchThread::run()
 {
     SearchAlgorithm algorithm(m_folder, m_date);
-    QVector<QString> sameDateMatches = algorithm.search();
-
-    emit searchResultReady(sameDateMatches);
+    algorithm.search();
+    emit searchResultReady(algorithm.getImages());
 }
