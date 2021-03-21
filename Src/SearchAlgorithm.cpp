@@ -14,19 +14,18 @@ SearchAlgorithm::SearchAlgorithm(const QString& folder, const QDate& date)
 void SearchAlgorithm::search()
 {
     m_images.clear();
-    QVector<QString> sameDateMatches;
     QString year = QString::number(m_date.year());
 
     QDirIterator it(m_folder, {"*.png", "*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
 
-    int images = 0;
+    int imageCount = 0;
     int imagesFailed = 0;
 
-    while (it.hasNext())
+    while(it.hasNext())
     {
         it.next();
 
-        images++;
+        imageCount++;
 
         QDate imageDate = dateFromFileName(it.fileInfo().absolutePath(), it.fileName());
         if (imageDate.isNull()) {
@@ -35,19 +34,21 @@ void SearchAlgorithm::search()
             continue;
         }
 
-        qint64 days = m_date.daysTo(imageDate);
-
-        if (days==0) {
-            sameDateMatches.append(it.filePath());
+        if((imageDate.day() == m_date.day()) && (imageDate.month() == m_date.month()))
+        {
+            auto& images = m_images[QString::number(imageDate.year())];
+            images.append(it.filePath());
         }
     }
 
-    qDebug() << "same date found" << sameDateMatches.size();
-    qDebug() << "images found" << images;
+    qDebug() << "images found" << imageCount;
     qDebug() << "images no date match" << imagesFailed;
 
-    if(sameDateMatches.size() > 0) {
-        m_images.insert(year, sameDateMatches);
+    QMap<QString, QVector<QString>>::const_iterator i = m_images.constBegin();
+    while(i != m_images.constEnd())
+    {
+        qDebug() << i.key() << ":" << i.value().size();
+        ++i;
     }
 }
 
@@ -72,13 +73,14 @@ QDate SearchAlgorithm::dateFromFileName(const QString& dir, const QString& name)
         }
     }
 
+    // TODO: ambiguous, can be 19 or 20 or whatever
     QRegularExpression re2(R"(^(\d\d)(\d\d)(\d\d)_)");
     match = re2.match(name);
 
     if (match.hasMatch()) {
         QDate imageDate =
             QDate(
-                match.captured(1).toInt(),
+                match.captured(1).toInt() + 2000,
                 match.captured(2).toInt(),
                 match.captured(3).toInt());
         if(!imageDate.isNull()) {

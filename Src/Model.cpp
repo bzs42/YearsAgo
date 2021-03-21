@@ -16,7 +16,7 @@ Model::Model()
 {
     QSettings settings;
     m_imageFolder = settings.value("imageFolder", QString()).toString();
-
+    m_imageYearsAgo = QImage(":/NoImageFound.png");
     qRegisterMetaType<QMap<QString, QVector<QString>>>("QMap<QString, QVector<QString>");
 }
 
@@ -42,26 +42,14 @@ void Model::setImageFolder(const QString& value)
 
 QImage Model::imageYearsAgo(int matchNumber) const
 {
-    if(matchNumber == 0) {
-        return m_imageYearsAgo;
+    int year = m_date.addYears(-m_yearsAgo).year();
+    int count = getImageCount(m_date.addYears(-m_yearsAgo).year());
+
+    if(matchNumber >= 0 && matchNumber < count) {
+        return getImage(year, matchNumber);
     }
 
-    QString year = QString::number(m_date.addYears(-yearsAgo()).year());
-
-    if(!m_sameDateMatches.contains(year)) {
-        return QImage();
-    }
-
-    if(matchNumber > 0 && matchNumber < m_sameDateMatches.value(year).size())
-    {
-        QImageReader reader(m_sameDateMatches.value(year)[matchNumber]);
-        reader.setAutoTransform(true);
-        QImage image = reader.read();
-        Q_ASSERT(!image.isNull());
-        return image;
-    }
-
-    return QImage();
+    return QImage(":/NoImageFound.png");
 }
 
 QDate Model::date() const
@@ -90,33 +78,39 @@ void Model::setYearsAgo(int value)
         return;
     }
     m_yearsAgo = value;
-    search();
+
+    int year = m_date.addYears(-m_yearsAgo).year();
+    int count = getImageCount(m_date.addYears(-m_yearsAgo).year());
+
+    if(count == 0) {
+        m_imageYearsAgo = QImage(":/NoImageFound.png");
+    }
+    else {
+        m_imageYearsAgo = getImage(year, 0);
+    }
+
+    emit imageYearsAgoChanged(m_imageYearsAgo);
+    emit matchCountChanged(count);
 }
 
 void Model::onSearchResultReady(QMap<QString, QVector<QString>> value)
 {
     m_isSearching = false;
-    emit searchFinished();
-
-    m_imageYearsAgo = QImage(":/SearchingFinished.png");
-
     m_sameDateMatches = value;
 
-    QString year = QString::number(m_date.addYears(-yearsAgo()).year());
-    if(!m_sameDateMatches.contains(year)) {
-        emit imageYearsAgoChanged(m_imageYearsAgo);
-        emit matchCountChanged(0);
-        return;
+    int year = m_date.addYears(-m_yearsAgo).year();
+    int count = getImageCount(m_date.addYears(-m_yearsAgo).year());
+
+    if(count == 0) {
+        m_imageYearsAgo = QImage(":/SearchingFinished.png");
+    }
+    else {
+        m_imageYearsAgo = getImage(year, 0);
     }
 
-    // need image reader to handle jpg orientation, QImage doesn't do it
-    QImageReader reader(m_sameDateMatches.value(year)[0]);
-    reader.setAutoTransform(true);
-    m_imageYearsAgo = reader.read();
-    Q_ASSERT(!m_imageYearsAgo.isNull());
+    emit searchFinished();
     emit imageYearsAgoChanged(m_imageYearsAgo);
-
-    emit matchCountChanged(m_sameDateMatches.value(year).size());
+    emit matchCountChanged(count);
 }
 
 void Model::search()
@@ -137,10 +131,32 @@ void Model::search()
     m_imageYearsAgo = QImage(":/SearchingStarted.png");
     emit imageYearsAgoChanged(m_imageYearsAgo);
 
-    auto* searchThread = new SearchThread(m_imageFolder, m_date.addYears(-m_yearsAgo), this);
+    auto* searchThread = new SearchThread(m_imageFolder, m_date, this);
     connect(searchThread, &SearchThread::searchResultReady, this, &Model::onSearchResultReady);
     connect(searchThread, &SearchThread::finished, searchThread, &QObject::deleteLater);
     searchThread->start();
+}
+
+int Model::getImageCount(int year) const
+{
+    if(!m_sameDateMatches.contains(QString::number(year))) {
+        return 0;
+    }
+    return m_sameDateMatches.value(QString::number(year)).size();
+}
+
+QImage Model::getImage(int year, int index) const
+{
+    if(getImageCount(year) == 0) {
+        return QImage(":/NoImageFound.png");
+    }
+
+    // need image reader to handle jpg orientation, QImage doesn't do it
+    QImageReader reader(m_sameDateMatches.value(QString::number(year))[index]);
+    reader.setAutoTransform(true);
+    QImage image = reader.read();
+    Q_ASSERT(!image.isNull());
+    return image;
 }
 
 
