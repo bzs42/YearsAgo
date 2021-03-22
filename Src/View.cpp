@@ -50,6 +50,12 @@ View::View(QWidget *parent)
     connect(&m_viewmodel, &ViewModel::canNextImageChanged, m_ui->pushButtonShowNext, &QPushButton::setEnabled);
     connect(m_ui->pushButtonShowNext, &QPushButton::clicked, &m_viewmodel, &ViewModel::doNextImage);
 
+    // pushButton shareImage
+    m_ui->pushButtonShare->setEnabled(m_viewmodel.canShare());
+    m_ui->pushButtonShare->setFocusPolicy(Qt::NoFocus);
+    connect(&m_viewmodel, &ViewModel::canShareChanged, m_ui->pushButtonShare, &QPushButton::setEnabled);
+    connect(m_ui->pushButtonShare, &QPushButton::clicked, &m_viewmodel, &ViewModel::doShare);
+
     // image
     // TODO: initial scale
     //m_ui->labelImagePlaceholder->setScaledContents(true);

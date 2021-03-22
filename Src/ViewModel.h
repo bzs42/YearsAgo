@@ -18,6 +18,8 @@ public:
 
     // commands
     bool canBrowse() const;
+    bool canNextImage() const;
+    bool canShare() const;
 
     // properties
     bool canImageFolder() const;
@@ -30,16 +32,17 @@ public:
     int minYearsAgo() const;
     int maxYearsAgo() const;
 
-    bool canNextImage() const;
-
 public slots:
     void doNextImage();
+    void doShare();
     void setImageFolder(const QString& value);
     void setYearsAgo(int value);
     void setBusy(bool value);
 
 signals:
     void canBrowseChanged(bool value);
+    void canNextImageChanged(bool value);
+    void canShareChanged(bool value);
     void canImageFolderChanged(bool value);
     void imageFolderChanged(const QString& value);
     void canYearsAgoChanged(bool value);
@@ -47,7 +50,6 @@ signals:
     void imageYearsAgoChanged(const QImage& value);
     void matchCountChanged(int value);
     void dateChanged(const QDate& value);
-    void canNextImageChanged(bool value);
 
 private:
     Model m_model;

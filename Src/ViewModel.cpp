@@ -15,7 +15,8 @@ ViewModel::ViewModel()
         [this](int value) {
             m_matchCount = value;
             m_matchNumber = 0;
-            emit canNextImageChanged(m_matchCount != 0);
+            emit canNextImageChanged(canNextImage());
+            emit canShareChanged(canShare());
         });
 
     connect(&m_model, &Model::searchStarted, this,
@@ -84,10 +85,21 @@ bool ViewModel::canNextImage() const
     if(m_isBusy) {
         return false;
     }
-    if(m_matchCount > 0) {
-        return true;
+    if(m_matchCount <= 0) {
+        return false;
     }
-    return false;
+    return true;
+}
+
+bool ViewModel::canShare() const
+{
+    if(m_isBusy) {
+        return false;
+    }
+    if(m_matchCount <= 0) {
+        return false;
+    }
+    return true;
 }
 
 void ViewModel::doNextImage()
@@ -100,6 +112,36 @@ void ViewModel::doNextImage()
         m_matchNumber = 0;
     }
     emit imageYearsAgoChanged(m_model.imageYearsAgo(m_matchNumber));
+}
+
+#include <QPainter>
+#include <QClipboard>
+#include <QPen>
+#include <QFont>
+#include <QString>
+#include <QRectF>
+#include <QGuiApplication>
+
+void ViewModel::doShare()
+{
+    QPainter p;
+    QImage image = m_model.imageYearsAgo(m_matchNumber);
+    QString text =
+        QString("%1\n %2 years ago").arg(m_model.date().toString(), QString::number(m_model.yearsAgo()));
+    bool ret = p.begin(&image);
+
+    p.setPen(QPen(Qt::black));
+    QFont font("Times");
+    font.setBold(true);
+    font.setPixelSize(image.rect().width()*0.08);
+    p.setFont(font);
+    p.drawText(image.rect().adjusted(-5, -5, -5, -5), Qt::AlignRight | Qt::AlignBottom, text);
+    p.end();
+
+    QClipboard *clipboard = QGuiApplication::clipboard();
+    clipboard->setImage(image);
+
+    emit imageYearsAgoChanged(image);
 }
 
 void ViewModel::setImageFolder(const QString& value)
@@ -135,4 +177,5 @@ void ViewModel::setBusy(bool value)
     emit canImageFolderChanged(canImageFolder());
     emit canNextImageChanged(canNextImage());
     emit canYearsAgoChanged(canYearsAgo());
+    emit canShareChanged(canShare());
 }
