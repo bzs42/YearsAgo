@@ -1,5 +1,8 @@
+#include "ImageGenerator.h"
 #include "ViewModel.h"
 
+#include <QClipboard>
+#include <QGuiApplication>
 #include <QPixmap>
 #include <QTimer>
 
@@ -114,29 +117,12 @@ void ViewModel::doNextImage()
     emit imageYearsAgoChanged(m_model.imageYearsAgo(m_matchNumber));
 }
 
-#include <QPainter>
-#include <QClipboard>
-#include <QPen>
-#include <QFont>
-#include <QString>
-#include <QRectF>
-#include <QGuiApplication>
-
 void ViewModel::doShare()
 {
-    QPainter p;
-    QImage image = m_model.imageYearsAgo(m_matchNumber);
-    QString text =
-        QString("%1\n %2 years ago").arg(m_model.date().toString(), QString::number(m_model.yearsAgo()));
-    bool ret = p.begin(&image);
-
-    p.setPen(QPen(Qt::black));
-    QFont font("Times");
-    font.setBold(true);
-    font.setPixelSize(image.rect().width()*0.08);
-    p.setFont(font);
-    p.drawText(image.rect().adjusted(-5, -5, -5, -5), Qt::AlignRight | Qt::AlignBottom, text);
-    p.end();
+    ImageGenerator imageGenerator;
+    imageGenerator.setDate(m_model.date());
+    imageGenerator.setYearsAgo(m_model.yearsAgo());
+    QImage image = imageGenerator.makeImage(m_model.imageYearsAgo(m_matchNumber));
 
     QClipboard *clipboard = QGuiApplication::clipboard();
     clipboard->setImage(image);

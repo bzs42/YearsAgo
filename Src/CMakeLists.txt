@@ -23,6 +23,8 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets LinguistTools REQUIRED)
 set(TS_FILES YearsAgo_de_DE.ts)
 
 set(PROJECT_SOURCES
+        ImageGenerator.cpp
+        ImageGenerator.h
         Model.cpp
         Model.h
         View.cpp
