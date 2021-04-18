@@ -155,7 +155,8 @@ QImage Model::getImage(int year, int index) const
     QImageReader reader(m_sameDateMatches.value(QString::number(year))[index]);
     reader.setAutoTransform(true);
     QImage image = reader.read();
-    Q_ASSERT(!image.isNull());
+    // TODO: return "could not read image"
+    //Q_ASSERT(!image.isNull());
     return image;
 }
 
