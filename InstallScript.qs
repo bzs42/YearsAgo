@@ -15,7 +15,7 @@ Component.prototype.createOperations = function()
             "@TargetDir@/bin/YearsAgo.exe",
             "@StartMenuDir@/YearsAgo.lnk",
             "workingDirectory=@TargetDir@",
-            "iconPath=%SystemRoot%/system32/SHELL32.dll",
+            "@TargetDir@/bin/App.ico",
             "iconId=2",
             "description=Start Years Ago Appplication");
     }
