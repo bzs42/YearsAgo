@@ -7,6 +7,7 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
 
 set(TS_FILES YearsAgo_de_DE.ts)
+qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
 set(PROJECT_SOURCES
     App.qrc
@@ -31,7 +32,7 @@ set(PROJECT_SOURCES
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/App.rc")
 
 add_executable(YearsAgo ${PROJECT_SOURCES} ${APP_ICON_RESOURCE_WINDOWS})
-qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+
 target_link_libraries(YearsAgo PRIVATE Qt5::Widgets)
 
 if(WIN32)
