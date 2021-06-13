@@ -33,7 +33,7 @@ QImage ImageGenerator::makeImage(const QImage& sourceImage)
         imageRect.adjusted(5, 5, -10, -5), Qt::AlignRight | Qt::AlignBottom, text);
 
     int penWidth = 4;
-    painter.setPen(QPen(QBrush(QColor(66, 17, 82)), penWidth));
+    painter.setPen(QPen(QBrush(QColor(40, 19, 79)), penWidth));
 
     auto fillRect = textRect.adjusted(-5, 0, 10, 5);
     painter.fillRect(fillRect, QBrush(QColor(66, 17, 82, 127)));
