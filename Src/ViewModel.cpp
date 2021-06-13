@@ -149,6 +149,7 @@ void ViewModel::setYearsAgo(int value)
         return;
     }
     m_model.setYearsAgo(value);
+    emit yearsAgoChanged(value);
 }
 
 void ViewModel::setBusy(bool value)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>359</width>
-    <height>455</height>
+    <width>533</width>
+    <height>587</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,7 +52,21 @@
       <item>
        <widget class="QLabel" name="labelYearsAgo">
         <property name="text">
-         <string>Years ago has:</string>
+         <string>Years ago:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelSearchDate">
+        <property name="text">
+         <string>SearchDate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelHas">
+        <property name="text">
+         <string>has</string>
         </property>
        </widget>
       </item>

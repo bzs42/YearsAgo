@@ -5,24 +5,48 @@
 #include <QFont>
 #include <QString>
 #include <QRectF>
+#include <QFontMetrics>
+#include <QLocale>
 
 QImage ImageGenerator::makeImage(const QImage& sourceImage)
 {
-    QString text =
-        QString("%1\n %2 years ago").arg(m_date.toString(), QString::number(m_yearsAgo));
+    QLocale locale(QLocale::German, QLocale::Germany);
+    QString format("ddd, d.M.yyyy");
+    QString text =            
+        QString("%1 %2 Ago\n%3").arg(
+            QString::number(m_yearsAgo),
+            m_yearsAgo == 1 ? "Year" : "Years", 
+            locale.toString(m_date.addYears(-m_yearsAgo), format));
 
-    QPainter p;
+    QPainter painter;
     QImage destImage = sourceImage.copy();
-    bool ret = p.begin(&destImage);
+    bool ret = painter.begin(&destImage);
 
-    p.setPen(QPen(Qt::black));
     QFont font("Times");
     font.setBold(true);
-    font.setPixelSize(destImage.rect().width()*0.08);
-    p.setFont(font);
-    p.drawText(destImage.rect().adjusted(-5, -5, -5, -5), Qt::AlignRight | Qt::AlignBottom, text);
+    font.setPixelSize(destImage.rect().width() * 0.05);
+    painter.setFont(font);
+    
+    const auto imageRect = QRect(destImage.rect());
+    const auto fontMetrics = QFontMetrics(font);
+    const auto textRect = fontMetrics.boundingRect(
+        imageRect.adjusted(5, 5, -10, -5), Qt::AlignRight | Qt::AlignBottom, text);
 
-    p.end();
+    int penWidth = 4;
+    painter.setPen(QPen(QBrush(QColor(66, 17, 82)), penWidth));
+
+    auto fillRect = textRect.adjusted(-5, 0, 10, 5);
+    painter.fillRect(fillRect, QBrush(QColor(66, 17, 82, 127)));
+    painter.drawRect(fillRect.adjusted(0, 0, -penWidth + 1, -penWidth + 1));
+
+    painter.setPen(QPen(Qt::white));
+    
+    painter.drawText(
+        textRect,
+        Qt::AlignRight | Qt::AlignBottom,
+        text);
+ 
+    painter.end();
 
     return destImage;
 }

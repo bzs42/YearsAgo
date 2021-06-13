@@ -12,10 +12,6 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationDisplayName("Years ago");
 
     View w;
-#ifdef Q_OS_ANDROID
-    w.showFullScreen();
-#else
     w.show();
-#endif
     return a.exec();
 }

@@ -9,7 +9,6 @@
 
 #include "SearchThread.h"
 
-
 Model::Model()
     : m_yearsAgo(1)
     , m_isSearching(false)

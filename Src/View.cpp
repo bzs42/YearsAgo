@@ -12,7 +12,6 @@ View::View(QWidget *parent)
     setWindowFlag(Qt::WindowMinimizeButtonHint, true);
     setWindowFlag(Qt::WindowMaximizeButtonHint, true);
 
-
     m_ui->setupUi(this);
 
     QSettings settings;
@@ -35,6 +34,36 @@ View::View(QWidget *parent)
     connect(&m_viewmodel, &ViewModel::canYearsAgoChanged, m_ui->spinBox, &QSpinBox::setEnabled);
     connect(
         m_ui->spinBox, QOverload<int>::of(&QSpinBox::valueChanged), &m_viewmodel, &ViewModel::setYearsAgo);
+
+    // label yearsAgo
+    m_viewmodel.yearsAgo() == 1 ? m_ui->labelYearsAgo->setText(tr("Year ago"))
+                                : m_ui->labelYearsAgo->setText(tr("Years ago"));
+    connect(
+        &m_viewmodel,
+        &ViewModel::yearsAgoChanged,
+        this,
+        [this](int value)
+        {
+            value == 1 ? m_ui->labelYearsAgo->setText(tr("Year ago"))
+                       : m_ui->labelYearsAgo->setText(tr("Years ago"));
+        });
+
+    // label searchDate
+    connect(
+        &m_viewmodel,
+        &ViewModel::dateChanged,
+        this,
+        [this](const QDate &value)
+        {
+            m_ui->labelSearchDate->setText(
+                m_viewmodel.date().addYears(m_viewmodel.yearsAgo()).toString());
+        });
+    connect(
+        &m_viewmodel,
+        &ViewModel::yearsAgoChanged,
+        this,
+        [this](int value)
+        { m_ui->labelSearchDate->setText(m_viewmodel.date().addYears(-value).toString()); });
 
     // label matchCount
     m_ui->labelMatchCount->setText("0");
