@@ -1,4 +1,5 @@
 #include "SearchAlgorithm.h"
+#include "ScopeTimer.h"
 
 #include <QDebug>
 #include <QDirIterator>
@@ -8,11 +9,12 @@ SearchAlgorithm::SearchAlgorithm(const QString& folder, const QDate& date)
     : m_folder(folder)
     , m_date(date)
 {
-
 }
 
 void SearchAlgorithm::search()
 {
+    ScopeTimer timer(QString("SearchAlgorithm::search"));
+    
     m_images.clear();
     QString year = QString::number(m_date.year());
 

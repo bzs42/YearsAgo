@@ -14,6 +14,7 @@ set(PROJECT_SOURCES
     ImageGenerator.h
     Model.cpp
     Model.h
+    ScopeTimer.h
     SearchAlgorithm.cpp
     SearchAlgorithm.h
     SearchThread.cpp
