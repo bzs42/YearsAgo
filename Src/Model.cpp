@@ -1,4 +1,5 @@
 #include "Model.h"
+#include "SearchThread.h"
 
 #include <QDebug>
 #include <QDirIterator>
@@ -6,8 +7,6 @@
 #include <QImageReader>
 #include <QRegularExpression>
 #include <QSettings>
-
-#include "SearchThread.h"
 
 Model::Model()
     : m_yearsAgo(1)
@@ -44,6 +43,7 @@ QImage Model::imageYearsAgo(int matchNumber) const
     int year = m_date.addYears(-m_yearsAgo).year();
     int count = getImageCount(m_date.addYears(-m_yearsAgo).year());
 
+    // TODO: move check to getImage
     if(matchNumber >= 0 && matchNumber < count) {
         return getImage(year, matchNumber);
     }
@@ -146,6 +146,7 @@ int Model::getImageCount(int year) const
 
 QImage Model::getImage(int year, int index) const
 {
+    // TODO: check index in range
     if(getImageCount(year) == 0) {
         return QImage(":/NoImageFound.png");
     }

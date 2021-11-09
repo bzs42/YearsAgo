@@ -1,6 +1,6 @@
 #include "SearchThread.h"
 
-#include <SearchAlgorithm.h>
+#include "SearchAlgorithm.h"
 
 SearchThread::SearchThread(const QString& folder, const QDate& date, QObject* parent)
     : QThread(parent)

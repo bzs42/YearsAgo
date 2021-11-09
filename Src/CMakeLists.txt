@@ -11,6 +11,8 @@ qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
 set(PROJECT_SOURCES
     App.qrc
+    Cache.cpp
+    Cache.h
     ImageGenerator.cpp
     ImageGenerator.h
     Model.cpp
