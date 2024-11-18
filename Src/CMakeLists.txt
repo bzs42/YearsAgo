@@ -4,10 +4,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Widgets LinguistTools REQUIRED)
+find_package(Qt6 COMPONENTS Widgets LinguistTools REQUIRED)
 
 set(TS_FILES YearsAgo_de_DE.ts)
-qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 
 set(PROJECT_SOURCES
     App.qrc
@@ -35,7 +35,7 @@ set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/App.rc")
 
 add_executable(YearsAgo ${PROJECT_SOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 
-target_link_libraries(YearsAgo PRIVATE Qt5::Widgets)
+target_link_libraries(YearsAgo PRIVATE Qt6::Widgets)
 
 if(WIN32)
     # use WinMain() entry point to hide console window and make a GUI application
@@ -43,7 +43,7 @@ if(WIN32)
 
     # install
 
-    get_target_property(_QmakeExecutable Qt5::qmake IMPORTED_LOCATION)
+    get_target_property(_QmakeExecutable Qt6::qmake IMPORTED_LOCATION)
     get_filename_component(_QtBinDir "${_QmakeExecutable}" DIRECTORY)
     find_program(_WindeployExecutable windeployqt HINTS "${_QtBinDir}")
     message(VERBOSE "_WindeployExecutable:"         ${_WindeployExecutable})

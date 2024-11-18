@@ -2,8 +2,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-find_package(Qt5 COMPONENTS Core Gui REQUIRED)
-find_package(Qt5Test REQUIRED)
+find_package(Qt6 COMPONENTS Core Gui REQUIRED)
+find_package(Qt6Test REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/Src)
 
@@ -19,7 +19,7 @@ add_executable(ModelTest
     ModelTest.h
 )
 add_test(NAME ModelTest COMMAND ModelTest)
-target_link_libraries(ModelTest PRIVATE Qt5::Test Qt5::Core Qt5::Gui)
+target_link_libraries(ModelTest PRIVATE Qt6::Test Qt6::Core Qt6::Gui)
 
 add_executable(CacheTest
     ${CMAKE_SOURCE_DIR}/Src/App.qrc
@@ -29,4 +29,4 @@ add_executable(CacheTest
     CacheTest.h
 )
 add_test(NAME CacheTest COMMAND CacheTest)
-target_link_libraries(CacheTest PRIVATE Qt5::Test Qt5::Core Qt5::Gui)
+target_link_libraries(CacheTest PRIVATE Qt6::Test Qt6::Core Qt6::Gui)
