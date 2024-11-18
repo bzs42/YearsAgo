@@ -49,21 +49,24 @@ View::View(QWidget *parent)
         });
 
     // label searchDate
+
     connect(
         &m_viewmodel,
         &ViewModel::dateChanged,
         this,
-        [this](const QDate &value)
+        [this](const QDate& value)
         {
-            m_ui->labelSearchDate->setText(
-                m_viewmodel.date().addYears(m_viewmodel.yearsAgo()).toString());
+            m_ui->labelSearchDate->setText(m_viewmodel.date().addYears(-m_viewmodel.yearsAgo()).toString());
         });
+
     connect(
         &m_viewmodel,
         &ViewModel::yearsAgoChanged,
         this,
         [this](int value)
-        { m_ui->labelSearchDate->setText(m_viewmodel.date().addYears(-value).toString()); });
+        {
+            m_ui->labelSearchDate->setText(m_viewmodel.date().addYears(-value).toString());
+        });
 
     // label matchCount
     m_ui->labelMatchCount->setText("0");
